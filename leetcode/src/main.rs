@@ -1,79 +1,72 @@
 struct Solution;
 
-// impl Solution {
-//     pub fn find_repeated_dna_sequences(s: String) -> Vec<String> {
-//         use std::collections::HashSet;
-
-//         let s = s.as_bytes();
-
-//         let mut set: HashSet<&[u8]> = HashSet::new();
-//         // println!("{:?}", set);
-//         let mut rs: HashSet<&[u8]> = HashSet::new();
-
-//         let mut i = 0;
-//         while i + 10 <= s.len() {
-//             let ss = &s[i..i+10];
-//             // println!("{:?} {}", set, i);
-//             // println!("{:?}",  set.contains(ss));
-//             if set.contains(ss) {
-//                 rs.insert(ss);
-//                 // println!("{:?}", ss);
-//             } else {
-//                 set.insert(ss);
-//             }
-//             i += 1;
-//         }
-
-//         use std::borrow::Cow;
-
-//         rs.into_iter()
-//         .map(|a| String::from_utf8_lossy(a))
-//         .map(|a| match a {
-//             Cow::Borrowed(v) => v.to_string(),
-//             Cow::Owned(v) => v,
-//         })
-//         .collect::<Vec<String>>()
-//     }
-// }
-
 impl Solution {
-    pub fn find_repeated_dna_sequences(s: String) -> Vec<String> {
-        use std::collections::HashMap;
-
-        let s = s.as_bytes();
-
-        let mut map: HashMap<&[u8], usize> = HashMap::new();
-
-        let mut i = 0;
-        while i + 10 <= s.len() {
-            let ss = &s[i..i + 10];
-            // println!("{:?} {}", set, i);
-            // println!("{:?}",  set.contains(ss));
-            let v = map.entry(ss).or_insert(0);
-            *v += 1;
-            i += 1;
+    pub fn rotate(nums: &mut Vec<i32>, k: i32) {
+        let length = nums.len();
+        let k = k as usize % length;
+        if k == 0 {
+            return;
         }
 
-        use std::borrow::Cow;
+        let mut a = length;
+        let mut b = k;
+        while a != b {
+            if a > b {
+                a = a - b;
+            } else {
+                b = b - a;
+            }
+        }
 
-        map.into_iter()
-            .filter(|a| a.1 > 1)
-            .map(|a| String::from_utf8_lossy(a.0))
-            .map(|a| match a {
-                Cow::Borrowed(v) => v.to_string(),
-                Cow::Owned(v) => v,
-            })
-            .collect::<Vec<String>>()
+        for i in 0..a {
+            // println!("i ========= {:?} {}", i, k);
+            let mut ii = i;
+            let mut next = (ii + k) % length;
+            let vv = nums[ii];
+            let mut vv = std::mem::replace(&mut nums[next], vv);
+            ii = next;
+            // println!("nums: {:?}", nums);
+            loop {
+                next = (ii + k) % length;
+                if next == i {
+                    nums[i] = vv;
+                    break;
+                }
+                vv = std::mem::replace(&mut nums[next], vv);
+                ii = next;
+                // println!("nums: {:?}", nums);
+            }
+        }
     }
 }
 
 fn main() {
-    println!("{}", 187);
+    println!("{}", 189);
 
-    // let hp = Solution::largest_number([1, 2, 9, 9, 91].to_vec());
-    // let hp = Solution::largest_number([1, 2].to_vec());
-    // let r = Solution::find_repeated_dna_sequences(String::from("AAAAACCCCCAAAAACCCCCCAAAAAGGGTTT"));
-    let r = Solution::find_repeated_dna_sequences(String::from("AAAAAAAAAAAAA"));
+    let start = std::time::Instant::now();
 
-    println!("{:#?}", r);
+    let mut nums = vec![1, 2, 3, 4, 5, 6, 7];
+    Solution::rotate(&mut nums, 3);
+    assert_eq!(nums, vec![5, 6, 7, 1, 2, 3, 4]);
+
+    nums = vec![-1, -100, 3, 99];
+    Solution::rotate(&mut nums, 2);
+    assert_eq!(nums, vec![3, 99, -1, -100]);
+
+    nums = vec![
+        1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25,
+        26, 27,
+    ];
+    Solution::rotate(&mut nums, 38);
+    assert_eq!(
+        nums,
+        vec![
+            17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13,
+            14, 15, 16
+        ]
+    );
+
+    let end = std::time::Instant::now();
+
+    println!("spend: {:?}", end - start);
 }
